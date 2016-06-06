@@ -9,7 +9,6 @@
     */
     zip<TSecond, TResult>(sequance: Array<TSecond>, func: (first: T, second: TSecond) => TResult): Array<TResult> | TResult[];
 
-
     /**
     *  Returns the first element of a sequence.
     */
@@ -34,5 +33,15 @@
     *  Determines the maximum value of specific property.
     */
     maxby(property: string): T;
+
+    /**
+    *  Sorts the elements of a sequence in ascending order according to a key.
+    */
+    orderby(func: (value: T) => any): Array<T>;
+
+    /**
+    *  Sorts the elements of a sequence in descending order according to a key.
+    */
+    orderbydesc(func: (value: T) => any): Array<T>;
    
 }
