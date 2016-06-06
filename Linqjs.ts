@@ -12,6 +12,8 @@ class LinqJs {
         this.InitAggregate();
         this.InitMinBy();
         this.InitMaxBy();
+        this.InitOrderBy();
+        this.InitOrderByDesc();
     }
 
     /**
