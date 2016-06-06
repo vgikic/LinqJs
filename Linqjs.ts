@@ -82,7 +82,14 @@ class LinqJs {
         }
     };
 
-
+    /**
+   *  Applies an accumulator function over a sequence.
+   */
+    private InitAggregate = () => {
+        Array.prototype['aggregate'] = function <T>(func: (previous: T, current: T, currentIndex: number, array: Array<T>) => T): T {
+            return (this as Array<T>).reduce(func);
+        }
+    };
 
 }
 

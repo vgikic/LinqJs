@@ -19,5 +19,10 @@
     *  Returns the last element of a sequence.
     */
     last(func: (value: T) => boolean): T;
+
+    /**
+    *  Applies an accumulator function over a sequence.
+    */
+    aggregate(func: (previous: T, current: T, currentIndex: number, array: Array<T>) => T): T;
    
 }
