@@ -24,5 +24,15 @@
     *  Applies an accumulator function over a sequence.
     */
     aggregate(func: (previous: T, current: T, currentIndex: number, array: Array<T>) => T): T;
+
+    /**
+     *  Determines the minimum value of specific property.
+    */
+    minby(property: string): T;
+
+    /**
+    *  Determines the maximum value of specific property.
+    */
+    maxby(property: string): T;
    
 }

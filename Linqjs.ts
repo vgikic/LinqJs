@@ -9,6 +9,9 @@ class LinqJs {
         this.InitZip();
         this.InitFirst();
         this.InitLast();
+        this.InitAggregate();
+        this.InitMinBy();
+        this.InitMaxBy();
     }
 
     /**
@@ -88,6 +91,54 @@ class LinqJs {
     private InitAggregate = () => {
         Array.prototype['aggregate'] = function <T>(func: (previous: T, current: T, currentIndex: number, array: Array<T>) => T): T {
             return (this as Array<T>).reduce(func);
+        }
+    };
+
+    /**
+    *   Determines the minimum value of specific property.
+    */
+    private InitMinBy = () => {
+        Array.prototype['minby'] = function <T>(property: string): T {
+            if (!this || this.length === 0)
+                return null;
+
+            if (!(property in this[0])) {
+                throw `Property ${property} does not exist in type ${this}`;
+            }
+
+            let result: T = (this) ? this[0] : null;
+            let sequanceLength = this.length;
+
+            for (let i = 1; i < sequanceLength; ++i) {
+                if (result[property] > this[i][property]) {
+                    result = this[i];
+                }
+            }
+            return result;
+        }
+    };
+
+    /**
+    *   Determines the maximum value of specific property.
+    */
+    private InitMaxBy = () => {
+        Array.prototype['maxby'] = function <T>(property: string): T {
+            if (!this || this.length === 0)
+                return null;
+
+            if (!(property in this[0])) {
+                throw `Property ${property} does not exist in type ${this}`;
+            }
+
+            let result: T = (this) ? this[0] : null;
+            let sequanceLength = this.length;
+
+            for (let i = 1; i < sequanceLength; ++i) {
+                if (result[property] < this[i][property]) {
+                    result = this[i];
+                }
+            }
+            return result;
         }
     };
 
