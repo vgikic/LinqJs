@@ -18,6 +18,27 @@ class LinqJs {
     }
 
     /**
+    *   Helper function that returns property name of the property that contains variable passed in lambda function.  
+    */
+    private GetPropertyName = <T>(func: (value: T) => any, arrayElement: T) => {
+        if (!(/\.([^\.;]+);?\s*\}$/.exec(func.toString()))) {
+            throw `Function argument has to be lambda expression that returns property, e.g. for Id property it would look like this: x => x.Id `;
+        }
+
+        let propertyName = (/\.([^\.;]+);?\s*\}$/.exec(func.toString())[1]);
+
+        if (!(propertyName in arrayElement)) {
+            let properties = "";
+            for (let prop in arrayElement) {
+                properties += ` '${prop}'`
+            }
+            throw `Property ${propertyName} does not exist selected type.\n Properties in object are: ${properties}`;
+        }
+
+        return propertyName;
+    };
+
+    /**
     * Filters a sequence of values based on a predicate.
     */
     private InitWhere = () => {
@@ -105,21 +126,20 @@ class LinqJs {
     *   Determines the minimum value of specific property.
     */
     private InitMinBy = () => {
-        Array.prototype['minby'] = function <T>(property: string): T {
+        let self = this;
+        Array.prototype['minby'] = function <T>(func: (value: T) => any): T {
             let inputArray = (this as Array<T>);
 
             if (!inputArray || inputArray.length === 0)
                 return null;
 
-            if (!(property in inputArray[0])) {
-                throw `Property ${property} does not exist in type ${inputArray}`;
-            }
+            let propertyName = self.GetPropertyName(func, inputArray[0]);
 
             let result: T = (inputArray) ? inputArray[0] : null;
             let sequanceLength = inputArray.length;
 
             for (let i = 1; i < sequanceLength; ++i) {
-                if (result[property] > inputArray[i][property]) {
+                if (result[propertyName] > inputArray[i][propertyName]) {
                     result = inputArray[i];
                 }
             }
@@ -131,21 +151,20 @@ class LinqJs {
     *   Determines the maximum value of specific property.
     */
     private InitMaxBy = () => {
-        Array.prototype['maxby'] = function <T>(property: string): T {
+        let self = this;
+        Array.prototype['maxby'] = function <T>(func: (value: T) => any): T {
             let inputArray = (this as Array<T>);
 
             if (!inputArray || inputArray.length === 0)
                 return null;
 
-            if (!(property in inputArray[0])) {
-                throw `Property ${property} does not exist in type ${inputArray}`;
-            }
+            let propertyName = self.GetPropertyName(func, inputArray[0]);
 
             let result: T = (inputArray) ? inputArray[0] : null;
             let sequanceLength = inputArray.length;
 
             for (let i = 1; i < sequanceLength; ++i) {
-                if (result[property] < inputArray[i][property]) {
+                if (result[propertyName] < inputArray[i][propertyName]) {
                     result = inputArray[i];
                 }
             }
@@ -157,6 +176,7 @@ class LinqJs {
     *  Sorts the elements of a sequence in ascending order according to a key.
     */
     private InitOrderBy = () => {
+        let self = this;
         Array.prototype['orderby'] = function <T>(func: (value: T) => any): Array<T> {
 
             let inputArray = (this as Array<T>);
@@ -164,20 +184,7 @@ class LinqJs {
             if (!inputArray || inputArray.length === 0)
                 return null;
 
-            if (!(/\.([^\.;]+);?\s*\}$/.exec(func.toString()))) {
-                throw `Function argument has to be lambda expression that returns property, e.g. for Id property it would look like this: (x)=>x.Id `;
-            }
-
-            let propertyName = (/\.([^\.;]+);?\s*\}$/.exec(func.toString())[1]);
-
-            if (!(propertyName in inputArray[0])) {
-                let properties = "";
-                for (let prop in inputArray[0]) {
-                    properties += ` '${prop}'`
-                }
-
-                throw `Property ${propertyName} does not exist selected type.\n Properties in object are: ${properties}`;
-            }
+            let propertyName = self.GetPropertyName(func, inputArray[0]);
 
             let sortedArray = inputArray.sort((first, second) => {
                 if (first[propertyName] < second[propertyName])
@@ -196,6 +203,7 @@ class LinqJs {
     *  Sorts the elements of a sequence in descending order according to a key.
     */
     private InitOrderByDesc = () => {
+        let self = this;
         Array.prototype['orderbydesc'] = function <T>(func: (value: T) => any): Array<T> {
 
             let inputArray = (this as Array<T>);
@@ -203,20 +211,7 @@ class LinqJs {
             if (!inputArray || inputArray.length === 0)
                 return null;
 
-            if (!(/\.([^\.;]+);?\s*\}$/.exec(func.toString()))) {
-                throw `Function argument has to be lambda expression that returns property, e.g. for Id property it would look like this: (x)=>x.Id `;
-            }
-
-            let propertyName = (/\.([^\.;]+);?\s*\}$/.exec(func.toString())[1]);
-
-            if (!(propertyName in inputArray[0])) {
-                let properties = "";
-                for (let prop in inputArray[0]) {
-                    properties += ` '${prop}'`
-                }
-
-                throw `Property ${propertyName} does not exist selected type.\n Properties in object are: ${properties}`;
-            }
+            let propertyName = self.GetPropertyName(func, inputArray[0]);
 
             let sortedArray = inputArray.sort((first, second) => {
                 if (first[propertyName] < second[propertyName])

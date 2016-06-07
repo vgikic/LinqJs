@@ -27,12 +27,12 @@
     /**
      *  Determines the minimum value of specific property.
     */
-    minby(property: string): T;
+    minby(func: (value: T) => any): T;
 
     /**
     *  Determines the maximum value of specific property.
     */
-    maxby(property: string): T;
+    maxby(func: (value: T) => any): T;
 
     /**
     *  Sorts the elements of a sequence in ascending order according to a key.
