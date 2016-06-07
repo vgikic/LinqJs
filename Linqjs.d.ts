@@ -49,4 +49,14 @@
     * @param rest N * comma separated Array<T> (optional)
     */
     distinct(...rest: Array<Array<T>>): Array<T>;
+
+    /**
+    *  Determines whether all elements of a sequence satisfy a condition.
+    */
+    all(func: (value: T) => boolean): boolean;
+
+    /**
+    *  Determines whether any element of a sequence satisfies a condition.
+    */
+    any(func: (value: T) => boolean): boolean;
 }

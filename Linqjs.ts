@@ -15,6 +15,8 @@ class LinqJs {
         this.InitOrderBy();
         this.InitOrderByDesc();
         this.InitDistinct();
+        this.InitAll();
+        this.InitAny();
     }
 
     /**
@@ -269,6 +271,26 @@ class LinqJs {
             return result;
         };
     }
+
+    /**
+    *  Determines whether all elements of a sequence satisfy a condition.
+    */
+    private InitAll = () => {
+        Array.prototype['all'] = function <T>(func: (value: T) => boolean): boolean {
+            let inputArray = (this as Array<T>);
+            return inputArray.every(func);
+        }
+    };
+
+    /**
+    *  Determines whether any element of a sequence satisfies a condition.
+    */
+    private InitAny = () => {
+        Array.prototype['any'] = function <T>(func: (value: T) => boolean): boolean {
+            let inputArray = (this as Array<T>);
+            return inputArray.some(func);
+        }
+    };
 
 }
 
