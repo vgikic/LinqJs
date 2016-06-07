@@ -17,6 +17,7 @@ class LinqJs {
         this.InitDistinct();
         this.InitAll();
         this.InitAny();
+        this.InitUnion();
     }
 
     /**
@@ -125,7 +126,7 @@ class LinqJs {
     };
 
     /**
-    *   Determines the minimum value of specific property.
+    *   Determines object with the minimum value of specific property.
     */
     private InitMinBy = () => {
         let self = this;
@@ -150,7 +151,7 @@ class LinqJs {
     };
 
     /**
-    *   Determines the maximum value of specific property.
+    *   Determines object with the maximum value of specific property.
     */
     private InitMaxBy = () => {
         let self = this;
@@ -241,9 +242,11 @@ class LinqJs {
 
             let combinedSequance: Array<T> = firstArray.concat([]);
 
-            for (let i = 0; i < rest.length; ++i)
-                combinedSequance = combinedSequance.concat(rest[i]);
-
+            for (let i = 0; i < rest.length; ++i) {
+                if (rest[i]) {
+                    combinedSequance = combinedSequance.concat(rest[i]);
+                }
+            }
 
             let result: Array<T> = [combinedSequance[0]];
             let properties = Object.keys(combinedSequance[0]);
@@ -292,6 +295,24 @@ class LinqJs {
         }
     };
 
+    /**
+    *  Produces the set union of two or more sequences.
+    *  If you want grouped distinct elements from multiple arrays use 'distinct' instead.
+    */
+    private InitUnion = () => {
+        Array.prototype['union'] = function <T>(...rest: Array<Array<T>>): Array<T> {
+            let inputArray = (this as Array<T>);
+
+            let combinedSequance: Array<T> = inputArray;
+
+            for (let i = 0; i < rest.length; ++i) {
+                if (rest[i]) {
+                    combinedSequance = combinedSequance.concat(rest[i]);
+                }
+            }
+            return combinedSequance;
+        }
+    };
 }
 
 export = new LinqJs();

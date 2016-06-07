@@ -25,12 +25,12 @@
     aggregate(func: (previous: T, current: T, currentIndex: number, array: Array<T>) => T): T;
 
     /**
-     *  Determines the minimum value of specific property.
+     *  Determines object with the minimum value of specific property.
     */
     minby(func: (value: T) => any): T;
 
     /**
-    *  Determines the maximum value of specific property.
+    *  Determines object with the maximum value of specific property.
     */
     maxby(func: (value: T) => any): T;
 
@@ -59,4 +59,10 @@
     *  Determines whether any element of a sequence satisfies a condition.
     */
     any(func: (value: T) => boolean): boolean;
+
+    /**
+    *  Produces the set union of two or more sequences.
+    *  If you want grouped distinct elements from multiple arrays use 'distinct' instead.
+    */
+    union(...rest: Array<Array<T>>): Array<T>;
 }
