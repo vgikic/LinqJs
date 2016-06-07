@@ -43,5 +43,10 @@
     *  Sorts the elements of a sequence in descending order according to a key.
     */
     orderbydesc(func: (value: T) => any): Array<T>;
-   
+
+    /**
+    *  Returns distinct elements from a sequence or sequences compared by value of each property.
+    * @param rest N * comma separated Array<T> (optional)
+    */
+    distinct(...rest: Array<Array<T>>): Array<T>;
 }

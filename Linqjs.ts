@@ -14,6 +14,7 @@ class LinqJs {
         this.InitMaxBy();
         this.InitOrderBy();
         this.InitOrderByDesc();
+        this.InitDistinct();
     }
 
     /**
@@ -229,6 +230,50 @@ class LinqJs {
             return sortedArray;
         }
     };
+
+    /**
+    *  Returns distinct elements from a sequence or sequences compared by value of each property.
+    * @param rest N * comma separated Array<T> (optional)
+    */
+    private InitDistinct = () => {
+        Array.prototype['distinct'] = function <T>(...rest: Array<Array<T>>): Array<T> {
+            let firstArray = (this as Array<T>);
+
+            if (!firstArray || !rest || (firstArray.length === 0 && rest.length === 0))
+                return null;
+
+            let combinedSequance: Array<T> = firstArray.concat([]);
+
+            for (let i = 0; i < rest.length; ++i)
+                combinedSequance = combinedSequance.concat(rest[i]);
+
+
+            let result: Array<T> = [combinedSequance[0]];
+            let properties = Object.keys(combinedSequance[0]);
+            let combinedSequanceLength = combinedSequance.length;
+
+            for (let i = 1; i < combinedSequanceLength; ++i) {
+                let propsWithSameValueCounter = 0;
+
+                for (let j = 0; j < result.length; ++j) {
+                    propsWithSameValueCounter = 0;
+
+                    for (let propertyIndex = 0; propertyIndex < properties.length; ++propertyIndex) {
+
+                        if (result[j][properties[propertyIndex]] === combinedSequance[i][properties[propertyIndex]]) {
+                            ++propsWithSameValueCounter;
+                        }
+                        else break;
+                    }
+
+                    if (propsWithSameValueCounter === properties.length) break;
+                }
+                if (propsWithSameValueCounter < properties.length)
+                    result.push(combinedSequance[i]);
+            }
+            return result;
+        };
+    }
 
 }
 
