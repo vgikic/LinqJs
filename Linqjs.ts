@@ -18,6 +18,8 @@ class LinqJs {
         this.InitAll();
         this.InitAny();
         this.InitUnion();
+        this.InitSelect();
+        this.InitIntersect();
     }
 
     /**
@@ -247,29 +249,36 @@ class LinqJs {
                     combinedSequance = combinedSequance.concat(rest[i]);
                 }
             }
-
             let result: Array<T> = [combinedSequance[0]];
             let properties = Object.keys(combinedSequance[0]);
             let combinedSequanceLength = combinedSequance.length;
 
-            for (let i = 1; i < combinedSequanceLength; ++i) {
-                let propsWithSameValueCounter = 0;
+            if (properties.length > 0) {
+                for (let i = 1; i < combinedSequanceLength; ++i) {
+                    let propsWithSameValueCounter = 0;
 
-                for (let j = 0; j < result.length; ++j) {
-                    propsWithSameValueCounter = 0;
+                    for (let j = 0; j < result.length; ++j) {
+                        propsWithSameValueCounter = 0;
 
-                    for (let propertyIndex = 0; propertyIndex < properties.length; ++propertyIndex) {
+                        for (let propertyIndex = 0; propertyIndex < properties.length; ++propertyIndex) {
 
-                        if (result[j][properties[propertyIndex]] === combinedSequance[i][properties[propertyIndex]]) {
-                            ++propsWithSameValueCounter;
+                            if (result[j][properties[propertyIndex]] === combinedSequance[i][properties[propertyIndex]]) {
+                                ++propsWithSameValueCounter;
+                            }
+                            else break;
                         }
-                        else break;
-                    }
 
-                    if (propsWithSameValueCounter === properties.length) break;
+                        if (propsWithSameValueCounter === properties.length) break;
+                    }
+                    if (propsWithSameValueCounter < properties.length)
+                        result.push(combinedSequance[i]);
                 }
-                if (propsWithSameValueCounter < properties.length)
-                    result.push(combinedSequance[i]);
+            }
+            else {
+                for (let i = 0; i < combinedSequanceLength; ++i) {
+                    if (result.indexOf(combinedSequance[i]) === -1)
+                        result.push(combinedSequance[i]);
+                }
             }
             return result;
         };
@@ -333,6 +342,67 @@ class LinqJs {
                 var transformed = func(inputArray[i], i);
                 result.push(transformed);
             }
+            return result;
+        };
+    };
+
+    /**
+    *  Produces the set intersection of two sequences by value of each property.
+    */
+    private InitIntersect = () => {
+        Array.prototype['intersect'] = function <T>(secondSequance: Array<T>): Array<T> {
+            let firstArray = (this as Array<T>);
+
+            if (!firstArray || !secondSequance || (firstArray.length === 0 && secondSequance.length === 0))
+                return null;
+
+            let result: Array<T> = [];
+            let properties = Object.keys(firstArray[0]);
+            let firstArrayLength = firstArray.length;
+            let secondArrayLength = secondSequance.length;
+
+            for (let i = 0; i < firstArrayLength; ++i) {
+
+                for (let j = 0; j < secondArrayLength; ++j) {
+                    let propsWithSameValueCounter = 0;
+
+                    for (let prop = 0; prop < properties.length; ++prop) {
+
+                        if (secondSequance[j][properties[prop]] !== firstArray[i][properties[prop]]) {
+                            break;
+                        } else {
+                            ++propsWithSameValueCounter;
+                        }
+                    }
+                    if (propsWithSameValueCounter === properties.length) {
+                        if (result.length === 0)
+                            result.push(firstArray[i]);
+                        else {
+                            let elementDoesNotExistInResult = true;
+                            for (let z = 0; z < result.length; ++z) {
+                                let resultPropsWithSameValueCounter = 0;
+
+                                for (let prop = 0; prop < properties.length; ++prop) {
+
+                                    if (result[z][properties[prop]] === firstArray[i][properties[prop]]) {
+                                        ++resultPropsWithSameValueCounter;
+                                    } else {
+                                        break;
+                                    }
+                                }
+                                if (resultPropsWithSameValueCounter === properties.length) {
+                                    elementDoesNotExistInResult = false;
+                                }
+                            }
+                            if (elementDoesNotExistInResult) {
+                                result.push(firstArray[i]);
+                            }
+                        }
+                    }
+                }
+
+            }
+
             return result;
         };
     };

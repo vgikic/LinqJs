@@ -72,4 +72,9 @@
     */
     select(func: (value: T, index?: number) => any): Array<T>;
 
+    /**
+    *  Produces the set intersection of two sequences by value of each property.
+    */
+    intersect(secondSequance: Array<T>): Array<T>;
+
 }
