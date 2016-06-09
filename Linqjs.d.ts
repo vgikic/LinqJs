@@ -65,4 +65,11 @@
     *  If you want grouped distinct elements from multiple arrays use 'distinct' instead.
     */
     union(...rest: Array<Array<T>>): Array<T>;
+
+    /**
+    *  Projects each element of a sequence into a new form.
+    * @param func A transform function to apply to each element.
+    */
+    select(func: (value: T, index?: number) => any): Array<T>;
+
 }

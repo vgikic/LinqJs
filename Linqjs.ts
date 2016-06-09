@@ -313,6 +313,29 @@ class LinqJs {
             return combinedSequance;
         }
     };
+
+
+    /**
+    *  Projects each element of a sequence into a new form.
+    *  @param func A transform function to apply to each element.
+    */
+    private InitSelect = () => {
+        var self = this;
+        Array.prototype['select'] = function <T>(func: (value: T, index?: number) => any): Array<T> {
+
+            let inputArray = (this as Array<T>);
+            var result: Array<T> = [];
+
+            if (!inputArray || inputArray.length === 0)
+                return null;
+
+            for (let i = 0; i < inputArray.length; ++i) {
+                var transformed = func(inputArray[i], i);
+                result.push(transformed);
+            }
+            return result;
+        };
+    };
 }
 
 export = new LinqJs();
