@@ -25,14 +25,14 @@
     aggregate(func: (previous: T, current: T, currentIndex: number, array: Array<T>) => T): T;
 
     /**
-     *  Determines object with the minimum value of specific property.
+     *  Determines the minimum value from collection of elements.
     */
-    minby(func: (value: T) => any): T;
+    min(func: (value: T) => any): T;
 
     /**
-    *  Determines object with the maximum value of specific property.
+    *  Determines the maximum value from collection of elements.
     */
-    maxby(func: (value: T) => any): T;
+    max(func: (value: T) => any): T;
 
     /**
     *  Sorts the elements of a sequence in ascending order according to a key.

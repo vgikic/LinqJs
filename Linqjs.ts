@@ -128,24 +128,36 @@ class LinqJs {
     };
 
     /**
-    *   Determines object with the minimum value of specific property.
+    *   Determines the minimum value from collection of elements.
     */
     private InitMinBy = () => {
         let self = this;
-        Array.prototype['minby'] = function <T>(func: (value: T) => any): T {
+        Array.prototype['min'] = function <T>(func: (value: T) => any): T {
             let inputArray = (this as Array<T>);
 
             if (!inputArray || inputArray.length === 0)
                 return null;
 
-            let propertyName = self.GetPropertyName(func, inputArray[0]);
+            let sortedArray;
+            let propertyName = ""
+
+            if (Object.keys(inputArray[0]).length > 0)
+                propertyName = self.GetPropertyName(func, inputArray[0]);
 
             let result: T = (inputArray) ? inputArray[0] : null;
             let sequanceLength = inputArray.length;
 
-            for (let i = 1; i < sequanceLength; ++i) {
-                if (result[propertyName] > inputArray[i][propertyName]) {
-                    result = inputArray[i];
+            if (propertyName) {
+                for (let i = 1; i < sequanceLength; ++i) {
+                    if (result[propertyName] > inputArray[i][propertyName]) {
+                        result = inputArray[i];
+                    }
+                }
+            } else {
+                for (let i = 1; i < sequanceLength; ++i) {
+                    if (result > inputArray[i]) {
+                        result = inputArray[i];
+                    }
                 }
             }
             return result;
@@ -153,24 +165,36 @@ class LinqJs {
     };
 
     /**
-    *   Determines object with the maximum value of specific property.
+    *   Determines the maximum value from collection of elements.
     */
     private InitMaxBy = () => {
         let self = this;
-        Array.prototype['maxby'] = function <T>(func: (value: T) => any): T {
+        Array.prototype['max'] = function <T>(func: (value: T) => any): T {
             let inputArray = (this as Array<T>);
 
             if (!inputArray || inputArray.length === 0)
                 return null;
 
-            let propertyName = self.GetPropertyName(func, inputArray[0]);
+            let sortedArray;
+            let propertyName = ""
+
+            if (Object.keys(inputArray[0]).length > 0)
+                propertyName = self.GetPropertyName(func, inputArray[0]);
 
             let result: T = (inputArray) ? inputArray[0] : null;
             let sequanceLength = inputArray.length;
 
-            for (let i = 1; i < sequanceLength; ++i) {
-                if (result[propertyName] < inputArray[i][propertyName]) {
-                    result = inputArray[i];
+            if (propertyName) {
+                for (let i = 1; i < sequanceLength; ++i) {
+                    if (result[propertyName] < inputArray[i][propertyName]) {
+                        result = inputArray[i];
+                    }
+                }
+            } else {
+                for (let i = 1; i < sequanceLength; ++i) {
+                    if (result < inputArray[i]) {
+                        result = inputArray[i];
+                    }
                 }
             }
             return result;
@@ -189,17 +213,32 @@ class LinqJs {
             if (!inputArray || inputArray.length === 0)
                 return null;
 
-            let propertyName = self.GetPropertyName(func, inputArray[0]);
+            let sortedArray;
+            let propertyName = ""
 
-            let sortedArray = inputArray.sort((first, second) => {
-                if (first[propertyName] < second[propertyName])
-                    return -1;
-                else if (first[propertyName] > second[propertyName])
-                    return 1;
-                else
-                    return 0;
-            });
+            if (Object.keys(inputArray[0]).length > 0)
+                propertyName = self.GetPropertyName(func, inputArray[0]);
 
+            if (propertyName) {
+                sortedArray = inputArray.sort((first, second) => {
+                    if (first[propertyName] < second[propertyName])
+                        return -1;
+                    else if (first[propertyName] > second[propertyName])
+                        return 1;
+                    else
+                        return 0;
+                });
+            }
+            else {
+                sortedArray = inputArray.sort((first, second) => {
+                    if (first < second)
+                        return -1;
+                    else if (first > second)
+                        return 1;
+                    else
+                        return 0;
+                });
+            }
             return sortedArray;
         }
     };
@@ -216,17 +255,32 @@ class LinqJs {
             if (!inputArray || inputArray.length === 0)
                 return null;
 
-            let propertyName = self.GetPropertyName(func, inputArray[0]);
+            let sortedArray;
+            let propertyName = "";
+            if (Object.keys(inputArray[0]).length > 0)
+                propertyName = self.GetPropertyName(func, inputArray[0]);
 
-            let sortedArray = inputArray.sort((first, second) => {
-                if (first[propertyName] < second[propertyName])
-                    return 1;
-                else if (first[propertyName] > second[propertyName])
-                    return -1;
-                else
-                    return 0;
-            });
+            if (propertyName) {
+                sortedArray = inputArray.sort((first, second) => {
+                    if (first[propertyName] < second[propertyName])
+                        return 1;
+                    else if (first[propertyName] > second[propertyName])
+                        return -1;
+                    else
+                        return 0;
+                });
+            }
+            else {
+                sortedArray = inputArray.sort((first, second) => {
+                    if (first < second)
+                        return 1;
+                    else if (first > second)
+                        return -1;
+                    else
+                        return 0;
+                });
 
+            }
             return sortedArray;
         }
     };
@@ -361,48 +415,55 @@ class LinqJs {
             let firstArrayLength = firstArray.length;
             let secondArrayLength = secondSequance.length;
 
-            for (let i = 0; i < firstArrayLength; ++i) {
+            if (properties.length > 0) {
+                for (let i = 0; i < firstArrayLength; ++i) {
 
-                for (let j = 0; j < secondArrayLength; ++j) {
-                    let propsWithSameValueCounter = 0;
+                    for (let j = 0; j < secondArrayLength; ++j) {
+                        let propsWithSameValueCounter = 0;
 
-                    for (let prop = 0; prop < properties.length; ++prop) {
+                        for (let prop = 0; prop < properties.length; ++prop) {
 
-                        if (secondSequance[j][properties[prop]] !== firstArray[i][properties[prop]]) {
-                            break;
-                        } else {
-                            ++propsWithSameValueCounter;
+                            if (secondSequance[j][properties[prop]] !== firstArray[i][properties[prop]]) {
+                                break;
+                            } else {
+                                ++propsWithSameValueCounter;
+                            }
                         }
-                    }
-                    if (propsWithSameValueCounter === properties.length) {
-                        if (result.length === 0)
-                            result.push(firstArray[i]);
-                        else {
-                            let elementDoesNotExistInResult = true;
-                            for (let z = 0; z < result.length; ++z) {
-                                let resultPropsWithSameValueCounter = 0;
+                        if (propsWithSameValueCounter === properties.length) {
+                            if (result.length === 0)
+                                result.push(firstArray[i]);
+                            else {
+                                let elementDoesNotExistInResult = true;
+                                for (let z = 0; z < result.length; ++z) {
+                                    let resultPropsWithSameValueCounter = 0;
 
-                                for (let prop = 0; prop < properties.length; ++prop) {
+                                    for (let prop = 0; prop < properties.length; ++prop) {
 
-                                    if (result[z][properties[prop]] === firstArray[i][properties[prop]]) {
-                                        ++resultPropsWithSameValueCounter;
-                                    } else {
-                                        break;
+                                        if (result[z][properties[prop]] === firstArray[i][properties[prop]]) {
+                                            ++resultPropsWithSameValueCounter;
+                                        } else {
+                                            break;
+                                        }
+                                    }
+                                    if (resultPropsWithSameValueCounter === properties.length) {
+                                        elementDoesNotExistInResult = false;
                                     }
                                 }
-                                if (resultPropsWithSameValueCounter === properties.length) {
-                                    elementDoesNotExistInResult = false;
+                                if (elementDoesNotExistInResult) {
+                                    result.push(firstArray[i]);
                                 }
-                            }
-                            if (elementDoesNotExistInResult) {
-                                result.push(firstArray[i]);
                             }
                         }
                     }
+
                 }
-
+            } else {
+                for (let element of firstArray) {
+                    if (result.indexOf(element) === -1 && secondSequance.indexOf(element) !== -1) {
+                        result.push(element);
+                    }
+                }
             }
-
             return result;
         };
     };
