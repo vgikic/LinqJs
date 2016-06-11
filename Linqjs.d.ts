@@ -77,4 +77,9 @@
     */
     intersect(secondSequance: Array<T>): Array<T>;
 
+    /**
+    *  Produces the subset of elements of input sequance that dont exist in second sequance.
+    */
+    except(secondSequance: Array<T>): Array<T>;
+
 }

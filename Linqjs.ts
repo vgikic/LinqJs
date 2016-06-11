@@ -10,8 +10,8 @@ class LinqJs {
         this.InitFirst();
         this.InitLast();
         this.InitAggregate();
-        this.InitMinBy();
-        this.InitMaxBy();
+        this.InitMin();
+        this.InitMax();
         this.InitOrderBy();
         this.InitOrderByDesc();
         this.InitDistinct();
@@ -20,6 +20,7 @@ class LinqJs {
         this.InitUnion();
         this.InitSelect();
         this.InitIntersect();
+        this.InitExcept();
     }
 
     /**
@@ -130,7 +131,7 @@ class LinqJs {
     /**
     *   Determines the minimum value from collection of elements.
     */
-    private InitMinBy = () => {
+    private InitMin = () => {
         let self = this;
         Array.prototype['min'] = function <T>(func: (value: T) => any): T {
             let inputArray = (this as Array<T>);
@@ -167,7 +168,7 @@ class LinqJs {
     /**
     *   Determines the maximum value from collection of elements.
     */
-    private InitMaxBy = () => {
+    private InitMax = () => {
         let self = this;
         Array.prototype['max'] = function <T>(func: (value: T) => any): T {
             let inputArray = (this as Array<T>);
@@ -462,6 +463,66 @@ class LinqJs {
                     if (result.indexOf(element) === -1 && secondSequance.indexOf(element) !== -1) {
                         result.push(element);
                     }
+                }
+            }
+            return result;
+        };
+    };
+
+    /**
+    *  Produces the subset of elements of input sequance that dont exist in second sequance.
+    */
+    private InitExcept = () => {
+        var self = this;
+        Array.prototype['except'] = function <T>(secondSequance: Array<T>): Array<T> {
+
+            let firstSequance = (this as Array<T>);
+            let result: Array<T> = [];
+            let firstArrayLength = firstSequance.length;
+
+            let properties = Object.keys(firstSequance[0]);
+
+            if (properties.length) {
+                for (let i = 0; i < firstArrayLength; ++i) {
+                    let isInResult = false;
+                    let isInSecondArray = false;
+
+                    for (let j = 0; j < result.length; j++) {
+                        let resultPropsWithSameValueCounter = 0;
+                        for (let propIndex = 0; propIndex < properties.length; ++propIndex) {
+                            if (result[j][properties[propIndex]] === firstSequance[i][properties[propIndex]]) {
+                                ++resultPropsWithSameValueCounter;
+                            }
+                            if (resultPropsWithSameValueCounter === properties.length) {
+                                isInResult = true;
+                            }
+                        }
+                        if (isInResult) break;
+                    }
+                    if (!isInResult) {
+                        let resultPropsWithSameValueCounter = 0;
+
+                        for (let k = 0; k < secondSequance.length; ++k) {
+
+                            for (let propIndex = 0; propIndex < properties.length; ++propIndex) {
+                                if (secondSequance[k][properties[propIndex]] === firstSequance[i][properties[propIndex]]) {
+                                    ++resultPropsWithSameValueCounter;
+                                }
+                                if (resultPropsWithSameValueCounter === properties.length) {
+                                    isInSecondArray = true;
+                                }
+                            }
+                            if (isInSecondArray) break;
+                        }
+                        if (!isInSecondArray)
+                            result.push(firstSequance[i]);
+                    }
+                }
+            }
+            else {
+                for (let firstArrElement of firstSequance) {
+                    if (result.indexOf(firstArrElement) === -1 && secondSequance.indexOf(firstArrElement) === -1)
+                        result.push(firstArrElement)
                 }
             }
             return result;
