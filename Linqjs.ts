@@ -21,6 +21,10 @@ class LinqJs {
         this.InitSelect();
         this.InitIntersect();
         this.InitExcept();
+        this.InitSkip();
+        this.InitSkipWhile();
+        this.InitTake();
+        this.InitTakeWhile();
     }
 
     /**
@@ -524,6 +528,98 @@ class LinqJs {
                     if (result.indexOf(firstArrElement) === -1 && secondSequance.indexOf(firstArrElement) === -1)
                         result.push(firstArrElement)
                 }
+            }
+            return result;
+        };
+    };
+
+    /**
+    *  Bypasses a specified number of elements in a sequence and then returns the remaining elements.
+    *  @param count The number of elements to skip before returning the remaining elements.
+    */
+    private InitSkip = () => {
+        var self = this;
+        Array.prototype['skip'] = function <T>(count: number): Array<T> {
+
+            let inputArray = (this as Array<T>);
+            let result: Array<T> = [];
+            if (!inputArray)
+                return null;
+            let inputArrayLength = inputArray.length;
+
+            for (let i = count; i < inputArrayLength; ++i) {
+                result.push(inputArray[i]);
+            }
+            return result;
+        };
+    };
+
+    /**
+    * Bypasses elements in a sequence as long as a specified condition is true and then returns the remaining elements.
+    *  @param func A function to test each source element for a condition;
+    *  the second parameter of the function represents the index of the source element.
+    */
+    private InitSkipWhile = () => {
+        var self = this;
+        Array.prototype['skipWhile'] = function <T>(func: (value: T, index?: number) => boolean): Array<T> {
+
+            let inputArray = (this as Array<T>);
+            let result: Array<T> = [];
+            if (!inputArray)
+                return null;
+            let inputArrayLength = inputArray.length;
+
+            for (let i = 0; i < inputArrayLength; ++i) {
+                if (!func(inputArray[i], i)) {
+                    result = inputArray.slice(i);
+                    break;
+                }
+            }
+            return result;
+        };
+    };
+
+    /**
+    *  Returns a specified number of contiguous elements from the start of a sequence.
+    *  @param count The number of elements to return.
+    */
+    private InitTake = () => {
+        var self = this;
+        Array.prototype['take'] = function <T>(count: number): Array<T> {
+
+            let inputArray = (this as Array<T>);
+            let result: Array<T> = [];
+            if (!inputArray)
+                return null;
+            let inputArrayLength = inputArray.length;
+
+            for (let i = 0; i < count && i < inputArrayLength; ++i) {
+                result.push(inputArray[i]);
+            }
+            return result;
+        };
+    };
+    
+    /**
+    * Returns elements from a sequence as long as a specified condition is true. The element's index is used in the logic of the predicate function.
+    *  @param func A function to test each source element for a condition;
+    *  the second parameter of the function represents the index of the source element.
+    */
+    private InitTakeWhile = () => {
+        var self = this;
+        Array.prototype['takeWhile'] = function <T>(func: (value: T, index?: number) => boolean): Array<T> {
+
+            let inputArray = (this as Array<T>);
+            let result: Array<T> = [];
+            if (!inputArray)
+                return null;
+            let inputArrayLength = inputArray.length;
+
+            for (let i = 0; i < inputArrayLength; ++i) {
+                if (func(inputArray[i], i))
+                    result.push(inputArray[i]);
+                else
+                    break;
             }
             return result;
         };

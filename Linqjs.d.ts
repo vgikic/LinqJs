@@ -1,4 +1,5 @@
 ﻿interface Array<T> {
+
     /**
     * Filters a sequence of values based on a predicate.
     */
@@ -81,5 +82,32 @@
     *  Produces the subset of elements of input sequance that dont exist in second sequance.
     */
     except(secondSequance: Array<T>): Array<T>;
+
+    /**
+    *  Bypasses a specified number of elements in a sequence and then returns the remaining elements.
+    *  @param count The number of elements to skip before returning the remaining elements.
+    */
+    skip(count: number): Array<T>;
+
+    /**
+    *  Bypasses elements in a sequence as long as a specified condition is true and then returns the remaining elements.
+    *  @param func A function to test each source element for a condition;
+    *  the second parameter of the function represents the index of the source element.
+    */
+    skipWhile(func: (value: T, index?: number) => boolean): Array<T>;
+
+
+    /**
+    *  Returns a specified number of contiguous elements from the start of a sequence.
+    *  @param count The number of elements to return.
+    */
+    take(count: number): Array<T>;
+
+    /**
+    * Returns elements from a sequence as long as a specified condition is true. The element's index is used in the logic of the predicate function.
+    *  @param func A function to test each source element for a condition;
+    *  the second parameter of the function represents the index of the source element.
+    */
+    takeWhile(func: (value: T, index?: number) => boolean): Array<T>;
 
 }
