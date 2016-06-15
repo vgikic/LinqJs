@@ -110,4 +110,14 @@
     */
     takeWhile(func: (value: T, index?: number) => boolean): Array<T>;
 
+    /**
+    *  Projects each element of a sequence to an Array,
+    *  flattens the resulting sequences into one sequence, and invokes a result selector
+    *  function on each element therein. The index of each source element is used in
+    *  the intermediate projected form of that element.
+    *  @param func A transform function to apply to each source element; the second parameter of the function represents the index of the source element.
+    *  @param resultFunc A transform function to apply to each element of the intermediate sequence.
+    */
+    selectMany<T2, TResult>(func: (value: T, index?: number) => Array<T2>, resultFunc?: (value: T, collection: T2, index?: number) => TResult): Array<TResult | T2>
+    
 }

@@ -624,6 +624,49 @@ class LinqJs {
             return result;
         };
     };
+
+    /**
+    *  Projects each element of a sequence to an Array,
+    *  flattens the resulting sequences into one sequence, and invokes a result selector
+    *  function on each element therein. The index of each source element is used in
+    *  the intermediate projected form of that element.
+    *  @param func A transform function to apply to each source element; the second parameter of the function represents the index of the source element.
+    *  @param resultFunc A transform function to apply to each element of the intermediate sequence.
+    */
+    private InitSelectMany = () => {
+        let self = this;
+        Array.prototype['selectMany'] = function <T, T2, TResult>(func: (value: T, index?: number) => T2, resultFunc?: (value: T, collection: T2, index?: number) => any): Array<TResult | T2> {
+            let result: Array<TResult | T2> = [];
+            let firstArray = (this as Array<T>);
+            let propertyName;
+
+            if (!firstArray) return null;
+            let sequanceLength = firstArray.length;
+            if (sequanceLength === 0) return result;
+
+            propertyName = self.GetPropertyName(func, firstArray[0]);
+
+            //throw exception if property selected in func is NOT enumerable
+            if (!firstArray[0][propertyName].hasOwnProperty('length')) {
+                throw `Property ${propertyName} has to be of Array type (needs to have length property)`;
+            }
+
+            for (let i = 0; i < sequanceLength; ++i) {
+                let collection = func(firstArray[i], i) as any;
+
+                if (collection) {
+                    for (let j = 0; j < collection.length; ++j) {
+
+                        if (!resultFunc)
+                            result.push(collection[j]);
+                        else
+                            result.push(resultFunc(firstArray[i], collection[j], j));
+                    }
+                }
+            }
+            return result;
+        }
+    };
 }
 
 export = new LinqJs();
