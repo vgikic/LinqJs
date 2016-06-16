@@ -34,18 +34,30 @@ class LinqJs {
     *   Helper function that returns property name of the property that contains variable passed in lambda function.  
     */
     private GetPropertyName = <T>(func: (value: T) => any, arrayElement: T) => {
-        if (!(/\.([^\.;]+);?\s*\}$/.exec(func.toString()))) {
+        let propertyName;
+        let propertyIsOnComplexType = false;
+
+        var valueTypeInLambdaFunction = /\s([^\.;]+);?\s*\}$/.exec(func.toString());
+        if (valueTypeInLambdaFunction) {
+            let lastIndexOfSpace = valueTypeInLambdaFunction[1].lastIndexOf(' ');
+            propertyName = valueTypeInLambdaFunction[1].substring(lastIndexOfSpace);
+        }
+        else if ((/\.([^\.;]+);?\s*\}$/.exec(func.toString()))) {
+            propertyName = (/\.([^\.;]+);?\s*\}$/.exec(func.toString())[1]);
+            propertyIsOnComplexType = true;
+        }
+        else {
             throw `Function argument has to be lambda expression that returns property, e.g. for Id property it would look like this: x => x.Id `;
         }
 
-        let propertyName = (/\.([^\.;]+);?\s*\}$/.exec(func.toString())[1]);
-
-        if (!(propertyName in arrayElement)) {
-            let properties = "";
-            for (let prop in arrayElement) {
-                properties += ` '${prop}'`
+        if (propertyIsOnComplexType) {
+            if (!(propertyName in arrayElement)) {
+                let properties = "";
+                for (let prop in arrayElement) {
+                    properties += ` '${prop}'`
+                }
+                throw `Property ${propertyName} does not exist selected type.\n Properties in object are: ${properties}`;
             }
-            throw `Property ${propertyName} does not exist selected type.\n Properties in object are: ${properties}`;
         }
 
         return propertyName;
@@ -696,15 +708,15 @@ class LinqJs {
 
             if (!outerSequance || !innerSequance) return null;
             let firstSequanceLength = outerSequance.length;
-            let secondSequanceLength = outerSequance.length;
+            let secondSequanceLength = innerSequance.length;
             if (firstSequanceLength === 0 || secondSequanceLength === 0) return result;
 
             outerKey = self.GetPropertyName(outerKeyFunc, outerSequance[0]);
             innerKey = self.GetPropertyName(innerKeyFunc, innerSequance[0]);
 
             ////throw exception if keys selected in funcs  are not of same type or are enumerable
-            if (outerSequance[0][outerKey].hasOwnProperty('length') ||
-                innerSequance[0][innerKey].hasOwnProperty('length') ||
+            if (outerSequance[0][outerKey] instanceof Array ||
+                innerSequance[0][innerKey] instanceof Array ||
                 typeof (innerSequance[0][innerKey]) !== typeof (outerSequance[0][outerKey])
             ) {
                 throw `Properties used for keys must not be enumerable and both have to be of same type!`;
@@ -712,8 +724,32 @@ class LinqJs {
 
             for (let i = 0; i < firstSequanceLength; ++i) {
                 for (let j = 0; j < secondSequanceLength; ++j) {
-                    if (outerSequance[i][outerKey] === innerSequance[j][innerKey]) {
-                        result.push(resultFunc(outerSequance[i], innerSequance[j]));
+
+                    if (outerSequance[i] && innerSequance[j]) {
+                        //if both are complex types
+                        if (outerSequance[i][outerKey] && innerSequance[j][innerKey]) {
+                            if (outerSequance[i][outerKey] === innerSequance[j][innerKey]) {
+                                result.push(resultFunc(outerSequance[i], innerSequance[j]));
+                            }
+                        }
+                        //if only outer sequance is of complex types
+                        else if (outerSequance[i][outerKey] && !innerSequance[j][innerKey]) {
+                            if (outerSequance[i][outerKey] === innerSequance[j]) {
+                                result.push(resultFunc(outerSequance[i], innerSequance[j]));
+                            }
+                        }
+                        //if only inner sequance is of complex types
+                        else if (!outerSequance[i][outerKey] && innerSequance[j][innerKey]) {
+                            if (outerSequance[i] === innerSequance[j][innerKey]) {
+                                result.push(resultFunc(outerSequance[i], innerSequance[j]));
+                            }
+                        }
+                        //if both sequances are simple types
+                        else {
+                            if ((outerSequance[i] as any) === (innerSequance[j] as any)) {
+                                result.push(resultFunc(outerSequance[i], innerSequance[j]));
+                            }
+                        }
                     }
                 }
             }
@@ -747,16 +783,20 @@ class LinqJs {
 
             if (!outerSequance || !innerSequance) return null;
             let firstSequanceLength = outerSequance.length;
-            let secondSequanceLength = outerSequance.length;
+            let secondSequanceLength = innerSequance.length;
             if (firstSequanceLength === 0 || secondSequanceLength === 0) return result;
 
             outerKey = self.GetPropertyName(outerKeyFunc, outerSequance[0]);
             innerKey = self.GetPropertyName(innerKeyFunc, innerSequance[0]);
 
             ////throw exception if keys selected in funcs  are not of same type or are enumerable
-            if (outerSequance[0][outerKey].hasOwnProperty('length') ||
-                innerSequance[0][innerKey].hasOwnProperty('length') ||
-                typeof (innerSequance[0][innerKey]) !== typeof (outerSequance[0][outerKey])
+            if (outerSequance[0][outerKey] instanceof Array ||
+                innerSequance[0][innerKey] instanceof Array ||
+                (typeof (innerSequance[0][innerKey]) !== typeof (outerSequance[0][outerKey]) &&
+                    typeof (innerSequance[0][innerKey]) !== typeof (outerSequance[0]) &&
+                    typeof (innerSequance[0]) !== typeof (outerSequance[0][outerKey]) &&
+                    typeof (innerSequance[0]) !== typeof (outerSequance[0])
+                )
             ) {
                 throw `Properties used for keys must not be enumerable and both have to be of same type!`;
             }
@@ -764,8 +804,32 @@ class LinqJs {
             for (let i = 0; i < firstSequanceLength; ++i) {
                 var collectionGroupdByKey: Array<TInner> = [];
                 for (let j = 0; j < secondSequanceLength; ++j) {
-                    if (outerSequance[i][outerKey] === innerSequance[j][innerKey]) {
-                        collectionGroupdByKey.push(innerSequance[j]);
+
+                    if (outerSequance[i] && innerSequance[j]) {
+                        //if both are complex types
+                        if (outerSequance[i][outerKey] && innerSequance[j][innerKey]) {
+                            if (outerSequance[i][outerKey] === innerSequance[j][innerKey]) {
+                                collectionGroupdByKey.push(innerSequance[j]);
+                            }
+                        }
+                        //if only outer sequance is of complex types
+                        else if (outerSequance[i][outerKey] && !innerSequance[j][innerKey]) {
+                            if (outerSequance[i][outerKey] === innerSequance[j]) {
+                                collectionGroupdByKey.push(innerSequance[j]);
+                            }
+                        }
+                        //if only inner sequance is of complex types
+                        else if (!outerSequance[i][outerKey] && innerSequance[j][innerKey]) {
+                            if (outerSequance[i] === innerSequance[j][innerKey]) {
+                                collectionGroupdByKey.push(innerSequance[j]);
+                            }
+                        }
+                        //if both sequances are simple types
+                        else {
+                            if ((outerSequance[i] as any) === (innerSequance[j] as any)) {
+                                collectionGroupdByKey.push(innerSequance[j]);
+                            }
+                        }
                     }
                 }
                 result.push(resultFunc(outerSequance[i], collectionGroupdByKey));
