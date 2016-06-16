@@ -25,6 +25,9 @@ class LinqJs {
         this.InitSkipWhile();
         this.InitTake();
         this.InitTakeWhile();
+        this.InitSelectMany();
+        this.InitJoinByKey();
+        this.InitGroupJoinByKey();
     }
 
     /**
@@ -663,6 +666,109 @@ class LinqJs {
                             result.push(resultFunc(firstArray[i], collection[j], j));
                     }
                 }
+            }
+            return result;
+        }
+    };
+
+    /**
+    *   Correlates the elements of two sequences based on matching keys. The default equality comparer is used to compare keys.
+    *   Similar to INNER JOIN in SQL
+    *   @param innerSequance The sequence to join to the first sequence.
+    *   @param outerKeyFunc A function to extract the join key from each element of the first sequence. (primary key)
+    *   @param innerKeyFunc A function to extract the join key from each element of the second sequence. (foreign key)
+    *   @param resultFunc A function to create a result element from two matching elements.
+    */
+    private InitJoinByKey = () => {
+        let self = this;
+        Array.prototype['joinByKey'] = function <T, TInner, TResult>
+            (innerSequance: Array<TInner>,
+            outerKeyFunc: (outerKey: T) => any,
+            innerKeyFunc: (innerKey: TInner) => any,
+            resultFunc: (outerValue: T, innerValue: TInner) => TResult
+
+            ): Array<TResult> {
+
+            let result: Array<TResult> = [];
+            let outerSequance = (this as Array<T>);
+            let outerKey;
+            let innerKey;
+
+            if (!outerSequance || !innerSequance) return null;
+            let firstSequanceLength = outerSequance.length;
+            let secondSequanceLength = outerSequance.length;
+            if (firstSequanceLength === 0 || secondSequanceLength === 0) return result;
+
+            outerKey = self.GetPropertyName(outerKeyFunc, outerSequance[0]);
+            innerKey = self.GetPropertyName(innerKeyFunc, innerSequance[0]);
+
+            ////throw exception if keys selected in funcs  are not of same type or are enumerable
+            if (outerSequance[0][outerKey].hasOwnProperty('length') ||
+                innerSequance[0][innerKey].hasOwnProperty('length') ||
+                typeof (innerSequance[0][innerKey]) !== typeof (outerSequance[0][outerKey])
+            ) {
+                throw `Properties used for keys must not be enumerable and both have to be of same type!`;
+            }
+
+            for (let i = 0; i < firstSequanceLength; ++i) {
+                for (let j = 0; j < secondSequanceLength; ++j) {
+                    if (outerSequance[i][outerKey] === innerSequance[j][innerKey]) {
+                        result.push(resultFunc(outerSequance[i], innerSequance[j]));
+                    }
+                }
+            }
+
+            return result;
+        }
+    };
+
+    /**
+    *   Correlates the elements of two sequences based on equality of keys and groups the results. The default equality comparer is used to compare keys.
+    *   Similar to Grouping results of INNER JOIN with common key.
+    *   @param innerSequance The sequence to join to the first sequence.
+    *   @param outerKeyFunc A function to extract the join key from each element of the first sequence. (primary key)
+    *   @param innerKeyFunc A function to extract the join key from each element of the second sequence. (foreign key)
+    *   @param resultFunc  A function to create a result element from an element from the first sequence and a collection of matching elements from the second sequence.   
+    */    
+    private InitGroupJoinByKey = () => {
+        let self = this;
+        Array.prototype['groupJoinByKey'] = function <T, TInner, TResult>
+            (innerSequance: Array<TInner>,
+            outerKeyFunc: (outerKey: T) => any,
+            innerKeyFunc: (innerKey: TInner) => any,
+            resultFunc: (outerValue: T, innerValue: Array<TInner>) => TResult
+
+            ): Array<TResult> {
+
+            let result: Array<TResult> = [];
+            let outerSequance = (this as Array<T>);
+            let outerKey;
+            let innerKey;
+
+            if (!outerSequance || !innerSequance) return null;
+            let firstSequanceLength = outerSequance.length;
+            let secondSequanceLength = outerSequance.length;
+            if (firstSequanceLength === 0 || secondSequanceLength === 0) return result;
+
+            outerKey = self.GetPropertyName(outerKeyFunc, outerSequance[0]);
+            innerKey = self.GetPropertyName(innerKeyFunc, innerSequance[0]);
+
+            ////throw exception if keys selected in funcs  are not of same type or are enumerable
+            if (outerSequance[0][outerKey].hasOwnProperty('length') ||
+                innerSequance[0][innerKey].hasOwnProperty('length') ||
+                typeof (innerSequance[0][innerKey]) !== typeof (outerSequance[0][outerKey])
+            ) {
+                throw `Properties used for keys must not be enumerable and both have to be of same type!`;
+            }
+
+            for (let i = 0; i < firstSequanceLength; ++i) {
+                var collectionGroupdByKey: Array<TInner> = [];
+                for (let j = 0; j < secondSequanceLength; ++j) {
+                    if (outerSequance[i][outerKey] === innerSequance[j][innerKey]) {
+                        collectionGroupdByKey.push(innerSequance[j]);
+                    }
+                }
+                result.push(resultFunc(outerSequance[i], collectionGroupdByKey));
             }
             return result;
         }
