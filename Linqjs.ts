@@ -28,6 +28,7 @@ class LinqJs {
         this.InitSelectMany();
         this.InitJoinByKey();
         this.InitGroupJoinByKey();
+        this.InitGroupBy();
     }
 
     /**
@@ -51,7 +52,7 @@ class LinqJs {
         }
 
         if (propertyIsOnComplexType) {
-            if (!(propertyName in arrayElement)) {
+            if (typeof (arrayElement) !== "string" && !(propertyName in arrayElement)) {
                 let properties = "";
                 for (let prop in arrayElement) {
                     properties += ` '${prop}'`
@@ -62,6 +63,40 @@ class LinqJs {
 
         return propertyName;
     };
+
+    /**
+    *   Helper method used in GroupBy extension for deciding in what form will be element that is pushed to
+    *   result Array based on input parameters.
+    */
+    private GetElementToPush = <T, TElement, TKey, TResult>
+        (currentValue,
+        sequance: Array<T>,
+        key: TKey,
+        property: string,
+        elementSelector?: (value: T) => TElement,
+        resultSelector?: (key: TKey, selecedElements: Array<TElement>) => TResult): TResult | TElement => {
+
+        let elementToPush: TResult | TElement;
+        if (resultSelector) {
+            let elements: Array<TElement> = [];
+
+            for (let i = 0; i < sequance.length; ++i) {
+                if ((sequance[i][property] === key)) {
+                    elements.push(elementSelector(sequance[i]));
+                }
+            }
+            elementToPush = resultSelector(key, elements);
+
+        }
+        else if (elementSelector) {
+            elementToPush = elementSelector(currentValue);
+        }
+        else {
+            elementToPush = currentValue;
+        }
+
+        return elementToPush;
+    }
 
     /**
     * Filters a sequence of values based on a predicate.
@@ -834,6 +869,78 @@ class LinqJs {
                 }
                 result.push(resultFunc(outerSequance[i], collectionGroupdByKey));
             }
+            return result;
+        }
+    };
+
+    /**
+    * Groups the elements of a sequence according to a specified key selector function
+    * and creates a result value from each group and its key. The elements of each
+    * group are projected by using a specified function.    
+    * @param keySelector  A function to extract the key for each element.
+    * @param elementSelector  A function to map each source element to an element (projection).
+    * @param resultSelector  A function to create a result value from each group from key and list of Elements
+    */
+    private InitGroupBy = () => {
+        let self = this;
+        Array.prototype['groupBy'] = function <T, TKey, TElement, TResult>
+            (keySelector: (value: T) => TKey,
+            elementSelector?: (value: T) => TElement,
+            resultSelector?: (key: TKey, selecedElements: Array<TElement>) => TResult
+            ): Array<TResult> {
+
+            let result: Array<TResult> = [];
+            let firstArray = (this as Array<T>);
+            let propertyName;
+
+            if (!firstArray) return null;
+            let sequanceLength = firstArray.length;
+            if (sequanceLength === 0) return result;
+
+            propertyName = self.GetPropertyName(keySelector, firstArray[0]);
+
+            //throw exception if property selected in func is NOT enumerable
+            if (firstArray[0][propertyName] instanceof Array
+            ) {
+                throw `Properties used for keys must not be enumerable!`;
+            }
+
+            if (resultSelector && !elementSelector) {
+                throw `ElementSelector must be provided if results selector is!`;
+            }
+
+            let usedKeys = [];
+            for (let i = 0; i < sequanceLength; ++i) {
+                let foundKey = false;
+
+                let funcResult = keySelector(firstArray[i]);
+                for (let j = 0; j < result.length; ++j) {
+
+                    if (result[j]["key"] === funcResult) {
+
+                        if ((usedKeys.indexOf(funcResult) === -1 && resultSelector) || elementSelector || keySelector) {
+                            let elementToPush = self.GetElementToPush(firstArray[i], firstArray, funcResult, propertyName, elementSelector, resultSelector);
+                            if (!resultSelector)
+                                result[j]["value"].push(elementToPush);
+                            else
+                                result[j]["value"] = elementToPush;
+                            usedKeys.push(funcResult);
+                        }
+                        foundKey = true;
+                        break;
+                    }
+                }
+                if (!foundKey) {
+                    let obj = {
+                        key: keySelector(firstArray[i]),
+                        value: (!resultSelector) ? [self.GetElementToPush(firstArray[i], firstArray, funcResult, propertyName, elementSelector, resultSelector)]
+                            : self.GetElementToPush(firstArray[i], firstArray, funcResult, propertyName, elementSelector, resultSelector)
+                    }
+                    usedKeys.push(funcResult);
+                    result.push(obj as any);
+                }
+            }
+
             return result;
         }
     };

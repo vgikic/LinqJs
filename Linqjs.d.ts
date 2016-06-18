@@ -153,4 +153,18 @@
         innerKeyFunc: (innerKey: TInner) => any,
         resultFunc: (outerValue: T, innerValue: Array<TInner>) => TResult
         ): Array<TResult>    
+
+    /**
+    * Groups the elements of a sequence according to a specified key selector function
+    * and creates a result value from each group and its key. The elements of each
+    * group are projected by using a specified function.    
+    * @param keySelector  A function to extract the key for each element.
+    * @param elementSelector  A function to map each source element to an element (projection).
+    * @param resultSelector  A function to create a result value from each group from key and list of Elements
+    */
+    groupBy<TKey, TElement, TResult>
+        (keySelector: (value: T) => TKey,
+        elementSelector?: (value: T) => TElement,
+        resultSelector?: (key: TKey, selectedElements: Array<TElement>) => TResult
+        ): Array<TResult>;
 }
