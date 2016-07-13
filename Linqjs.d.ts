@@ -1,4 +1,8 @@
-﻿interface Array<T> {
+﻿interface String {
+    select(func: (value: string, index?: number) => any): Array<string>;
+
+}
+interface Array<T> {
 
     /**
     * Filters a sequence of values based on a predicate.
@@ -28,12 +32,12 @@
     /**
      *  Determines the minimum value from collection of elements.
     */
-    min(func: (value: T) => any): T;
+    min(func: (value: T) => T | number | string): T;
 
     /**
     *  Determines the maximum value from collection of elements.
     */
-    max(func: (value: T) => any): T;
+    max(func: (value: T) => T | number | string): T;
 
     /**
     *  Sorts the elements of a sequence in ascending order according to a key.

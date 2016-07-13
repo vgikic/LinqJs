@@ -64,6 +64,19 @@ class LinqJs {
         return propertyName;
     };
 
+
+    /**
+    *  Creates a copy of array without reference to input array.
+    */
+    private DeepArrayCopy = (array: Array<any>) => {
+        let result = [];
+        for (let i = 0; i < array.length; ++i) {
+            let element = JSON.parse(JSON.stringify(array[i]));
+            result.push(element);
+        }
+        return result;
+    };
+
     /**
     *   Helper method used in GroupBy extension for deciding in what form will be element that is pushed to
     *   result Array based on input parameters.
@@ -187,7 +200,7 @@ class LinqJs {
     */
     private InitMin = () => {
         let self = this;
-        Array.prototype['min'] = function <T>(func: (value: T) => any): T {
+        Array.prototype['min'] = function <T>(func: (value: T) => T | number | string): T {
             let inputArray = (this as Array<T>);
 
             if (!inputArray || inputArray.length === 0)
@@ -224,7 +237,7 @@ class LinqJs {
     */
     private InitMax = () => {
         let self = this;
-        Array.prototype['max'] = function <T>(func: (value: T) => any): T {
+        Array.prototype['max'] = function <T>(func: (value: T) => T | number | string): T {
             let inputArray = (this as Array<T>);
 
             if (!inputArray || inputArray.length === 0)
@@ -275,7 +288,7 @@ class LinqJs {
                 propertyName = self.GetPropertyName(func, inputArray[0]);
 
             if (propertyName) {
-                sortedArray = inputArray.sort((first, second) => {
+                sortedArray = self.DeepArrayCopy(inputArray).sort((first, second) => {
                     if (first[propertyName] < second[propertyName])
                         return -1;
                     else if (first[propertyName] > second[propertyName])
@@ -285,7 +298,7 @@ class LinqJs {
                 });
             }
             else {
-                sortedArray = inputArray.sort((first, second) => {
+                sortedArray = self.DeepArrayCopy(inputArray).sort((first, second) => {
                     if (first < second)
                         return -1;
                     else if (first > second)
@@ -316,7 +329,7 @@ class LinqJs {
                 propertyName = self.GetPropertyName(func, inputArray[0]);
 
             if (propertyName) {
-                sortedArray = inputArray.sort((first, second) => {
+                sortedArray = self.DeepArrayCopy(inputArray).sort((first, second) => {
                     if (first[propertyName] < second[propertyName])
                         return 1;
                     else if (first[propertyName] > second[propertyName])
@@ -326,7 +339,7 @@ class LinqJs {
                 });
             }
             else {
-                sortedArray = inputArray.sort((first, second) => {
+                sortedArray = self.DeepArrayCopy(inputArray).sort((first, second) => {
                     if (first < second)
                         return 1;
                     else if (first > second)
@@ -399,6 +412,7 @@ class LinqJs {
     private InitAll = () => {
         Array.prototype['all'] = function <T>(func: (value: T) => boolean): boolean {
             let inputArray = (this as Array<T>);
+            if (inputArray.length === 0) return false;
             return inputArray.every(func);
         }
     };
@@ -409,6 +423,7 @@ class LinqJs {
     private InitAny = () => {
         Array.prototype['any'] = function <T>(func: (value: T) => boolean): boolean {
             let inputArray = (this as Array<T>);
+            if (inputArray.length === 0) return false;
             return inputArray.some(func);
         }
     };
@@ -433,6 +448,8 @@ class LinqJs {
     };
 
 
+
+        
     /**
     *  Projects each element of a sequence into a new form.
     *  @param func A transform function to apply to each element.
@@ -440,6 +457,21 @@ class LinqJs {
     private InitSelect = () => {
         var self = this;
         Array.prototype['select'] = function <T>(func: (value: T, index?: number) => any): Array<T> {
+
+            let inputArray = (this as Array<T>);
+            var result: Array<T> = [];
+
+            if (!inputArray || inputArray.length === 0)
+                return null;
+
+            for (let i = 0; i < inputArray.length; ++i) {
+                var transformed = func(inputArray[i], i);
+                result.push(transformed);
+            }
+            return result;
+        };
+
+        String.prototype['select'] = function <T>(func: (value: T, index?: number) => any): Array<T> {
 
             let inputArray = (this as Array<T>);
             var result: Array<T> = [];
